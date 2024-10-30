@@ -1,0 +1,85 @@
+#load packages
+import random
+import os
+
+# File to store top players
+TOP_PLAYERS_FILE = 'topPlayers.txt'
+
+# Load top players from the file.
+def load_top_players():
+    players = []
+    if os.path.exists(TOP_PLAYERS_FILE):
+        with open(TOP_PLAYERS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    score, name = line.split()
+                    players.append((int(score), name))
+    return players
+
+# Save the top five players to the file.
+def save_top_players(players):
+    with open(TOP_PLAYERS_FILE, 'w') as f:
+        for score, name in players[:5]:
+            f.write(f"{score:<10} {name}\n")
+
+# Update the list of top players with the new score.
+def update_top_players(players, player_name, score):
+    players.append((score, player_name))
+    players = sorted(players, key=lambda x: x[0])[:5]  # Keep only top 5
+    save_top_players(players)
+
+# Display the top players.
+def display_top_players(players):
+    print("\nTop Players:")
+    for score, name in players:
+        print(f"{score:<10} {name}")
+
+# Game Loop
+def play_game(player_name):
+    target_number = random.randint(1, 100)
+    guess_count = 0
+    
+    while True:
+        try:
+            guess = input("Enter your guess (1-100) or type 'quit' to exit: ")
+            if guess.lower() == 'quit':
+                print("Thanks for playing!")
+                return
+            
+            guess = int(guess)
+            guess_count += 1
+
+            if guess < 1 or guess > 100:
+                print("Please enter a number between 1 and 100.")
+                continue
+
+            if guess < target_number:
+                print("Your guess is low. Try again!")
+            elif guess > target_number:
+                print("Your guess is high. Try Again!")
+            else:
+                print(f"Good job, {player_name}! You guessed it in {guess_count} tries.")
+                return
+        except ValueError:
+            print("Invalid input. Please enter a number between 1 and 100.")
+
+def main():
+    print("Welcome to the Fun Number Guessing Game!")
+    print("I've chosen a really fun integer between 1 and 100. Try to guess it!")
+    player_name = input("Please enter your name for the score card? ")
+
+    players = load_top_players()
+    while True:
+        play_game(player_name)
+        update_top_players(players, player_name, len(players) + 1)  # Assuming one guess is the initial attempt
+        players = load_top_players()  # Reload players to display updated scores
+        display_top_players(players)
+
+        play_again = input("Would you like to play again? (yes/no): ").lower()
+        if play_again != 'yes':
+            break
+
+    print("Thanks for playing! Goodbye!")
+
+if __name__ == "__main__":
+    main()
